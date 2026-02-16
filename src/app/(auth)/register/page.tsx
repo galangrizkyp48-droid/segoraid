@@ -38,7 +38,7 @@ export default function RegisterPage() {
         setError('')
 
         try {
-            const { data, error } = await supabase.auth.signUp({
+            const { data: authData, error } = await supabase.auth.signUp({
                 email: data.email,
                 password: data.password,
                 options: {
@@ -56,7 +56,7 @@ export default function RegisterPage() {
 
             if (error) throw error
 
-            if (data.session) {
+            if (authData.session) {
                 // Email confirmation disabled -> Auto login
                 toast.success('Registrasi berhasil! Selamat datang.')
                 router.push('/')
