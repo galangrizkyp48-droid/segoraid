@@ -8,6 +8,7 @@ import * as z from 'zod'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/lib/store/authStore'
 
 // Schema validation
 const registerSchema = z.object({
