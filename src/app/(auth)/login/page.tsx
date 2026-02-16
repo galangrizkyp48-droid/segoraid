@@ -25,7 +25,8 @@ export default function LoginPage() {
 
             if (error) throw error
 
-            router.push('/')
+            // Force hard navigation to clear any stale state
+            window.location.href = '/'
         } catch (err: any) {
             console.error('Login error:', err)
             if (err.message.includes('Email not confirmed')) {
