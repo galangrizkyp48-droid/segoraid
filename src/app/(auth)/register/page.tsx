@@ -38,7 +38,7 @@ export default function RegisterPage() {
         setError('')
 
         try {
-            const { error } = await supabase.auth.signUp({
+            const { data, error } = await supabase.auth.signUp({
                 email: data.email,
                 password: data.password,
                 options: {
@@ -56,12 +56,17 @@ export default function RegisterPage() {
 
             if (error) throw error
 
-            toast.success('Registrasi berhasil! Cek email untuk verifikasi akun Anda.', {
-                duration: 5000,
-            })
-
-            // 4. Redirect to home (or login if email verification is enforced)
-            router.push('/')
+            if (data.session) {
+                // Email confirmation disabled -> Auto login
+                toast.success('Registrasi berhasil! Selamat datang.')
+                router.push('/')
+            } else {
+                // Email confirmation enabled
+                toast.success('Registrasi berhasil! Cek email untuk verifikasi akun Anda.', {
+                    duration: 5000,
+                })
+                router.push('/login')
+            }
 
         } catch (err: any) {
             console.error(err)
