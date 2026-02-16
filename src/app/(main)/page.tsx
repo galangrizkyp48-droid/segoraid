@@ -25,8 +25,33 @@ export default function HomePage() {
     const [filter, setFilter] = useState('for_you') // for_you, trending, my_campus, newest
     const [loadingMore, setLoadingMore] = useState(false)
 
+    const [newPostsAvailable, setNewPostsAvailable] = useState(false)
+
     useEffect(() => {
         fetchPosts()
+
+        // Realtime Subscription
+        const channel = supabase
+            .channel('public:posts')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'posts',
+                    filter: filter === 'my_campus' && user?.university_name
+                        ? `campus=eq.${user.university_name}`
+                        : undefined
+                },
+                () => {
+                    setNewPostsAvailable(true)
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
     }, [filter, user])
 
     const fetchPosts = async (loadMore = false) => {
@@ -35,10 +60,12 @@ export default function HomePage() {
         } else {
             setLoading(true)
             setPosts([])
+            setNewPostsAvailable(false) // Reset on refresh
         }
 
         try {
             const page = loadMore ? Math.ceil(posts.length / 10) : 0
+            // ... rest of fetchPosts logic ...
             const from = page * 10
             const to = from + 9
 
@@ -159,7 +186,21 @@ export default function HomePage() {
             </header>
 
             {/* Posts Feed */}
-            <div className="">
+            <div className="relative">
+                {newPostsAvailable && (
+                    <div className="absolute top-4 left-0 right-0 z-10 flex justify-center">
+                        <button
+                            onClick={() => {
+                                window.scrollTo({ top: 0, behavior: 'smooth' })
+                                fetchPosts()
+                            }}
+                            className="bg-sky-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-semibold hover:bg-sky-700 transition animate-bounce"
+                        >
+                            ↑ Postingan Baru Tersedia
+                        </button>
+                    </div>
+                )}
+
                 {loading ? (
                     <LoadingSkeleton count={3} />
                 ) : posts.length === 0 ? (

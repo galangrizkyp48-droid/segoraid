@@ -107,10 +107,10 @@ export default function CreatePostPage() {
         }
 
         setUploading(true)
+        const imageUrls: string[] = []
 
         try {
             // 1. Upload images to Supabase Storage
-            const imageUrls: string[] = []
 
             for (let i = 0; i < images.length; i++) {
                 const file = images[i]
@@ -198,6 +198,21 @@ export default function CreatePostPage() {
         } catch (error: any) {
             console.error('Error creating post:', error)
             toast.error(`Gagal: ${error.message || 'Terjadi kesalahan'}`)
+
+            // Cleanup uploaded images on error
+            if (imageUrls.length > 0) {
+                const imagePaths = imageUrls.map(url => {
+                    const parts = url.split('/posts/')
+                    return parts[1] // Extract path after bucket name
+                }).filter(Boolean)
+
+                if (imagePaths.length > 0) {
+                    await supabase.storage
+                        .from('posts')
+                        .remove(imagePaths)
+                    console.log('Cleaned up orphaned images')
+                }
+            }
         } finally {
             setUploading(false)
             setUploadProgress(0)

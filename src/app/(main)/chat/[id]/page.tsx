@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/lib/store/authStore'
 import { supabase } from '@/lib/supabase/client'
@@ -66,7 +66,6 @@ export default function ChatRoomPage() {
                 },
                 (payload) => {
                     setMessages(prev => [...prev, payload.new as Message])
-                    scrollToBottom()
                 }
             )
             .subscribe()
@@ -75,6 +74,25 @@ export default function ChatRoomPage() {
             supabase.removeChannel(channel)
         }
     }, [chatId])
+
+    // Use LayoutEffect to scroll immediately after render
+    useLayoutEffect(() => {
+        scrollToBottom()
+    }, [messages])
+
+    const scrollToBottom = () => {
+        // Immediate scroll
+        if (scrollRef.current) {
+            scrollRef.current.scrollIntoView({ behavior: 'smooth' })
+        }
+
+        // Double check for images loading
+        setTimeout(() => {
+            if (scrollRef.current) {
+                scrollRef.current.scrollIntoView({ behavior: 'smooth' })
+            }
+        }, 300)
+    }
 
     const findOrCreateChat = async (otherUserId: string) => {
         if (!user) return
@@ -163,11 +181,7 @@ export default function ChatRoomPage() {
         }
     }
 
-    const scrollToBottom = () => {
-        setTimeout(() => {
-            scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-        }, 100)
-    }
+
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -238,8 +252,8 @@ export default function ChatRoomPage() {
                     >
                         <div
                             className={`max-w-[70%] px-4 py-2 rounded-2xl ${msg.sender_id === user?.id
-                                    ? 'bg-sky-600 text-white'
-                                    : 'bg-white border'
+                                ? 'bg-sky-600 text-white'
+                                : 'bg-white border'
                                 }`}
                         >
                             <p className="text-sm">{msg.content}</p>
