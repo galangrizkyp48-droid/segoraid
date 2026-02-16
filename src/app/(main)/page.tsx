@@ -20,6 +20,7 @@ export default function HomePage() {
     const { user } = useAuthStore()
     const [posts, setPosts] = useState<Post[]>([])
     const [loading, setLoading] = useState(true)
+    const [errorMsg, setErrorMsg] = useState('')
     // const [lastDoc, setLastDoc] = useState<DocumentSnapshot | null>(null) // Not needed for Supabase range
     const [hasMore, setHasMore] = useState(true)
     const [filter, setFilter] = useState('for_you') // for_you, trending, my_campus, newest
@@ -100,8 +101,9 @@ export default function HomePage() {
                 setPosts(newPosts)
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching posts:', error)
+            setErrorMsg(error.message || 'Gagal memuat postingan')
             // Fallback to empty array on error
             if (!loadMore) {
                 setPosts([])
@@ -201,9 +203,19 @@ export default function HomePage() {
                     </div>
                 )}
 
+                {/* Error State */}
+                {errorMsg && (
+                    <div className="p-4 mx-4 mt-4 bg-red-50 border border-red-200 text-red-600 rounded-lg text-center">
+                        <p>{errorMsg}</p>
+                        <button onClick={() => fetchPosts()} className="mt-2 text-sm underline font-semibold">
+                            Coba Lagi
+                        </button>
+                    </div>
+                )}
+
                 {loading ? (
                     <LoadingSkeleton count={3} />
-                ) : posts.length === 0 ? (
+                ) : posts.length === 0 && !errorMsg ? (
                     <div className="pt-20">
                         <EmptyState
                             icon="📦"
