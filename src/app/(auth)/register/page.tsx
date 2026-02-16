@@ -56,7 +56,9 @@ export default function RegisterPage() {
 
             if (error) throw error
 
-            toast.success('Registrasi berhasil! Silakan cek email atau login.')
+            toast.success('Registrasi berhasil! Cek email untuk verifikasi akun Anda.', {
+                duration: 5000,
+            })
 
             // 4. Redirect to home (or login if email verification is enforced)
             router.push('/')

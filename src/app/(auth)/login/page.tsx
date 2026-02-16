@@ -27,8 +27,14 @@ export default function LoginPage() {
 
             router.push('/')
         } catch (err: any) {
-            console.error(err)
-            setError('Email atau password salah')
+            console.error('Login error:', err)
+            if (err.message.includes('Email not confirmed')) {
+                setError('Email belum dikonfirmasi. Silakan cek inbox/spam email Anda.')
+            } else if (err.message === 'Invalid login credentials') {
+                setError('Email atau password salah')
+            } else {
+                setError(err.message || 'Terjadi kesalahan login')
+            }
         } finally {
             setLoading(false)
         }
