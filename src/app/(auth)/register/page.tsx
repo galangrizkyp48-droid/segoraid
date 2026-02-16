@@ -26,6 +26,7 @@ const registerSchema = z.object({
 
 export default function RegisterPage() {
     const router = useRouter()
+    const { setUser, setSession } = useAuthStore()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
 
@@ -58,6 +59,22 @@ export default function RegisterPage() {
 
             if (authData.session) {
                 // Email confirmation disabled -> Auto login
+                // OPTIMISTIC UPDATE: Set user immediately to prevent race condition with DB trigger
+                setSession(authData.session)
+                setUser({
+                    id: authData.user!.id,
+                    email: data.email,
+                    name: data.name,
+                    phone: data.phone,
+                    university_id: data.universityId,
+                    university_name: data.universityId === 'UI' ? 'Universitas Indonesia' :
+                        data.universityId === 'ITB' ? 'Institut Teknologi Bandung' :
+                            data.universityId === 'UGM' ? 'Universitas Gadjah Mada' : data.universityId,
+                    university_short_name: data.universityId,
+                    avatar_url: null,
+                    year: data.year ? parseInt(data.year) : undefined
+                })
+
                 toast.success('Registrasi berhasil! Selamat datang.')
                 router.push('/')
             } else {
