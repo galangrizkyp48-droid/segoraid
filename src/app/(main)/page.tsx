@@ -56,17 +56,25 @@ export default function HomePage() {
     }, [filter, user])
 
     const fetchPosts = async (loadMore = false) => {
+        // Check for Env Vars
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        if (!supabaseUrl) {
+            setLoading(false)
+            setErrorMsg('Konfigurasi Error: Supabase URL tidak ditemukan. Cek Vercel Env Variables.')
+            return
+        }
+
         if (loadMore) {
             setLoadingMore(true)
         } else {
             setLoading(true)
             setPosts([])
-            setNewPostsAvailable(false) // Reset on refresh
+            setErrorMsg('')
+            setNewPostsAvailable(false)
         }
 
         try {
             const page = loadMore ? Math.ceil(posts.length / 10) : 0
-            // ... rest of fetchPosts logic ...
             const from = page * 10
             const to = from + 9
 
@@ -85,7 +93,15 @@ export default function HomePage() {
                 query = query.order('likes_count', { ascending: false })
             }
 
-            const { data, error } = await query
+            // Add 10s Timeout
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Koneksi timeout, periksa internet anda')), 10000)
+            )
+
+            const { data, error } = await Promise.race([
+                query,
+                timeoutPromise
+            ]) as any
 
             if (error) throw error
 
