@@ -56,25 +56,30 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             initAuth: () => {
-                // Check active session
+                // Check active session immediately
                 supabase.auth.getSession().then(({ data: { session } }) => {
                     set({ session })
                     if (session?.user) {
                         fetchProfile(session.user.id)
                     } else {
-                        set({ loading: false })
+                        set({ loading: false, user: null })
                     }
+                }).catch((err) => {
+                    console.error("Auth session check failed:", err)
+                    set({ loading: false })
                 })
 
                 // Listen for changes
                 const {
                     data: { subscription },
-                } = supabase.auth.onAuthStateChange(async (_event, session) => {
-                    set({ session })
-                    if (session?.user) {
+                } = supabase.auth.onAuthStateChange(async (event, session) => {
+                    if (event === 'SIGNED_OUT') {
+                        set({ session: null, user: null, loading: false })
+                    } else if (session?.user) {
+                        set({ session })
                         await fetchProfile(session.user.id)
                     } else {
-                        set({ user: null, loading: false })
+                        set({ session: null, loading: false })
                     }
                 })
 

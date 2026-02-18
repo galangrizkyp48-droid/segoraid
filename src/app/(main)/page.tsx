@@ -29,7 +29,10 @@ export default function HomePage() {
     const [newPostsAvailable, setNewPostsAvailable] = useState(false)
 
     useEffect(() => {
-        fetchPosts()
+        // Only fetch if filter is not user-dependent OR user is loaded
+        if (filter !== 'my_campus' || user?.university_name) {
+            fetchPosts()
+        }
 
         // Realtime Subscription
         const channel = supabase
@@ -205,6 +208,16 @@ export default function HomePage() {
 
             {/* Posts Feed */}
             <div className="relative">
+                {/* DEBUG OVERLAY - DELETE LATER */}
+                <div className="bg-black/80 text-white p-4 text-xs font-mono mb-4 rounded-lg mx-4">
+                    <p>STATUS DEBUGGER (Vercel):</p>
+                    <p>Loading: {loading ? 'TRUE' : 'FALSE'}</p>
+                    <p>Error: {errorMsg || 'NONE'}</p>
+                    <p>Posts: {posts.length}</p>
+                    <p>Supabase Url: {process.env.NEXT_PUBLIC_SUPABASE_URL ? 'FOUND' : 'MISSING'}</p>
+                    <p>Filter: {filter}</p>
+                </div>
+
                 {newPostsAvailable && (
                     <div className="absolute top-4 left-0 right-0 z-10 flex justify-center">
                         <button

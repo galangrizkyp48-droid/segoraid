@@ -199,12 +199,15 @@ export default function PostCard({ post }: { post: Post }) {
             {/* Seller Info */}
             <div className="flex items-center gap-3 p-4">
                 <img
-                    src={post.profiles?.avatar_url || post.sellerAvatar || '/default-avatar.png'}
+                    src={post.profiles?.avatar_url || post.sellerAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.profiles?.name || post.sellerName || 'User')}&background=random`}
                     alt={post.profiles?.name || post.sellerName}
-                    className="w-10 h-10 rounded-full cursor-pointer object-cover"
+                    className="w-10 h-10 rounded-full cursor-pointer object-cover border"
                     onClick={(e) => {
                         e.stopPropagation()
                         router.push(`/profile/${post.user_id}`)
+                    }}
+                    onError={(e) => {
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.profiles?.name || 'User')}&background=random`
                     }}
                 />
                 <div className="flex-1">
@@ -227,8 +230,8 @@ export default function PostCard({ post }: { post: Post }) {
             </div>
 
             {/* Images */}
-            {post.images && post.images.length > 0 && (
-                <div className="relative aspect-square">
+            {post.images && post.images.length > 0 && post.images[0] && (
+                <div className="relative aspect-square w-full bg-gray-100">
                     <Image
                         src={post.images[0]}
                         alt={post.title}
@@ -236,6 +239,11 @@ export default function PostCard({ post }: { post: Post }) {
                         height={600}
                         className="w-full h-full object-cover"
                         loading="lazy"
+                        unoptimized={true} // Bypass Next.js Image Optimization to fix loading issues
+                        onError={(e) => {
+                            // Fallback if image fails
+                            e.currentTarget.style.display = 'none'
+                        }}
                     />
                 </div>
             )}
