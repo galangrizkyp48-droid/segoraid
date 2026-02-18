@@ -1,6 +1,7 @@
 "use client"
 
 import { useCartStore } from '@/lib/store/cartStore'
+import { useAuthStore } from '@/lib/store/authStore'
 import { formatPrice } from '@/lib/utils/formatters'
 import { ArrowLeft, MapPin, Truck, CreditCard, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -8,6 +9,7 @@ import { useState } from 'react'
 
 export default function CheckoutPage() {
     const router = useRouter()
+    const { user } = useAuthStore()
     const { items, getTotal, clearCart } = useCartStore()
     const total = getTotal()
     const [loading, setLoading] = useState(false)
@@ -43,13 +45,20 @@ export default function CheckoutPage() {
                         <span className="text-sm font-semibold">Alamat Pengiriman</span>
                     </div>
                     <div className="pl-6">
-                        <p className="font-semibold text-sm">Budi Santoso | 08123456789</p>
+                        <p className="font-semibold text-sm">{user?.name} | {user?.phone || 'No. HP belum diatur'}</p>
                         <p className="text-xs text-gray-500 mt-1">
-                            Fakultas Ilmu Komputer UI, Gedung B Lantai 2, Depok, Jawa Barat
+                            {user?.location
+                                ? user.location
+                                : user?.university_name
+                                    ? `${user.university_name} (Lokasi belum diatur)`
+                                    : 'Alamat belum diatur'}
                         </p>
                     </div>
-                    <button className="w-full mt-3 py-2 border rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
-                        Ubah Alamat
+                    <button
+                        onClick={() => router.push('/profile/edit')}
+                        className="w-full mt-3 py-2 border rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50"
+                    >
+                        Ubah Alamat / Kontak
                     </button>
                 </div>
 
