@@ -16,7 +16,7 @@ export default function MainLayout({
     const showBottomNav = !pathname.includes('/chat/') || pathname === '/chat'
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
+        <div className="min-h-screen bg-gray-50 pb-20">
             <Header />
             <main className="max-w-md mx-auto min-h-screen bg-white shadow-sm md:max-w-2xl lg:max-w-4xl">
                 {children}
