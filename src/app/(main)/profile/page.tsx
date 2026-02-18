@@ -20,7 +20,7 @@ export default function ProfilePage() {
         if (!user) {
             router.push('/login')
         } else {
-                        const fetchItems = async () => {
+            const fetchItems = async () => {
                 setLoading(true)
                 try {
                     if (activeTab === 'saved') {
@@ -43,7 +43,25 @@ export default function ProfilePage() {
                             .order('created_at', { ascending: false })
 
                         if (error) throw error
-                        setItems(data || [])
+
+                        // Client-side filtering for Selling vs Sold
+                        const allPosts = data || []
+                        let filteredPosts = []
+
+                        if (activeTab === 'sold') {
+                            // Show only Products with 0 stock
+                            filteredPosts = allPosts.filter((post: any) =>
+                                post.type === 'product' && post.stock === 0
+                            )
+                        } else {
+                            // Selling: Products with stock > 0 OR Non-products (Services/Info)
+                            filteredPosts = allPosts.filter((post: any) =>
+                                (post.type === 'product' && (post.stock === undefined || post.stock > 0)) ||
+                                post.type !== 'product'
+                            )
+                        }
+
+                        setItems(filteredPosts)
                     }
                 } catch (error) {
                     console.error('Error fetching items:', error)

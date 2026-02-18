@@ -57,7 +57,7 @@ export default function PostCard({ post }: { post: Post }) {
 
         // Optimistic update
         setLiked(!previousLiked)
-        setLikeCount(prev => previousLiked ? prev - 1 : prev + 1)
+        setLikeCount(prev => Math.max(0, previousLiked ? prev - 1 : prev + 1))
 
         try {
             if (previousLiked) {
