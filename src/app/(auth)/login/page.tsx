@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -11,6 +11,11 @@ export default function LoginPage() {
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    let mounted = true
+
+    useEffect(() => {
+        return () => { mounted = false }
+    }, [])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -25,10 +30,14 @@ export default function LoginPage() {
 
             if (error) throw error
 
-            // Force hard navigation to clear any stale state
-            window.location.href = '/'
+            if (error) throw error
+
+            // Soft navigation with state refresh
+            router.refresh()
+            router.replace('/')
         } catch (err: any) {
             console.error('Login error:', err)
+            // Specific error handling remains...
             if (err.message.includes('Email not confirmed')) {
                 setError('Email belum dikonfirmasi. Silakan cek inbox/spam email Anda.')
             } else if (err.message === 'Invalid login credentials') {
@@ -37,7 +46,7 @@ export default function LoginPage() {
                 setError(err.message || 'Terjadi kesalahan login')
             }
         } finally {
-            setLoading(false)
+            if (mounted) setLoading(false)
         }
     }
 
