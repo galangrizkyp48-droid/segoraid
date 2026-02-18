@@ -4,6 +4,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 export interface CartItem {
     postId: string;
     sellerId: string;
+    sellerName: string;
+    sellerAvatar?: string;
     title: string;
     image: string;
     price: number;

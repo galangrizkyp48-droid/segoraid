@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Settings, LogOut, MapPin, School, Edit } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import PostCard from '@/components/post/PostCard'
+import GridPostCard from '@/components/post/GridPostCard'
 import EmptyState from '@/components/shared/EmptyState'
 
 
@@ -168,9 +168,15 @@ export default function ProfilePage() {
                 {/* Tab Content */}
                 <div className="min-h-[200px]">
                     {loading ? (
-                        <div className="text-center py-10 text-gray-400">Loading...</div>
+                        <div className="grid grid-cols-2 gap-3">
+                            {[...Array(4)].map((_, i) => (
+                                <div key={i} className="bg-gray-100 rounded-xl aspect-[3/4] animate-pulse" />
+                            ))}
+                        </div>
                     ) : items.length > 0 ? (
-                        items.map(item => <PostCard key={item.id} post={item} />)
+                        <div className="grid grid-cols-2 gap-3">
+                            {items.map(item => <GridPostCard key={item.id} post={item} />)}
+                        </div>
                     ) : (
                         <EmptyState
                             icon="📭"

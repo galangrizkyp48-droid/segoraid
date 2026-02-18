@@ -181,6 +181,8 @@ export default function PostCard({ post }: { post: Post }) {
         addItem({
             postId: post.id,
             sellerId: post.user_id,
+            sellerName: post.profiles?.name || post.sellerName || 'Seller',
+            sellerAvatar: post.profiles?.avatar_url || post.sellerAvatar,
             title: post.title,
             image: post.images[0],
             price: post.price || 0,
@@ -194,14 +196,14 @@ export default function PostCard({ post }: { post: Post }) {
     return (
         <div
             onClick={() => router.push(`/post/${post.id}`)}
-            className="bg-white border-b cursor-pointer hover:bg-gray-50 transition"
+            className="bg-white border-b mb-2 last:mb-0 md:rounded-xl md:border md:shadow-sm cursor-pointer hover:bg-gray-50 transition overflow-hidden"
         >
-            {/* Seller Info */}
+            {/* Header: User Info */}
             <div className="flex items-center gap-3 p-4">
                 <img
                     src={post.profiles?.avatar_url || post.sellerAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.profiles?.name || post.sellerName || 'User')}&background=random`}
                     alt={post.profiles?.name || post.sellerName}
-                    className="w-10 h-10 rounded-full cursor-pointer object-cover border"
+                    className="w-10 h-10 rounded-full cursor-pointer object-cover border border-gray-100"
                     onClick={(e) => {
                         e.stopPropagation()
                         router.push(`/profile/${post.user_id}`)
@@ -210,150 +212,96 @@ export default function PostCard({ post }: { post: Post }) {
                         e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.profiles?.name || 'User')}&background=random`
                     }}
                 />
-                <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                        <p className="font-semibold">{post.profiles?.name || post.sellerName}</p>
-                        <span className="text-xs px-2 py-0.5 bg-sky-100 text-sky-700 rounded">
-                            {post.profiles?.university_name || post.sellerUniversity}
-                        </span>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1">
+                        <p className="font-bold text-gray-900 truncate">{post.profiles?.name || post.sellerName}</p>
+                        {/* Optional Verified Badge can go here */}
                     </div>
-                    <p className="text-sm text-gray-500">
-                        {formatTimeAgo(new Date(post.created_at))} · {post.campus || 'Kampus'}
+                    <p className="text-xs text-gray-500 truncate">
+                        {post.profiles?.university_name || post.sellerUniversity || 'Mahasiswa'} · {formatTimeAgo(new Date(post.created_at))}
                     </p>
                 </div>
                 <button
                     onClick={handleSave}
-                    className="text-gray-400 hover:text-sky-600 transition"
+                    className="text-gray-400 hover:text-sky-600 transition p-1"
                 >
-                    <Bookmark className={saved ? 'fill-current text-sky-600' : ''} size={20} />
+                    <Bookmark className={saved ? 'fill-current text-sky-600' : ''} size={22} />
                 </button>
             </div>
 
-            {/* Images */}
+            {/* Content: Text & Image */}
+            <div className="px-4 pb-2">
+                <h3 className="font-bold text-lg leading-snug text-gray-900 mb-1 line-clamp-2">{post.title}</h3>
+
+                {/* Price */}
+                <div className="mb-3">
+                    {post.price !== undefined && (
+                        <p className="text-xl font-bold text-orange-600">
+                            {post.price_type === 'free' ? 'GRATIS' : formatPrice(post.price)}
+                            {post.negotiable && <span className="text-xs text-gray-400 font-normal ml-2">Nego</span>}
+                        </p>
+                    )}
+                </div>
+            </div>
+
+            {/* Image (Full Width) */}
             {post.images && post.images.length > 0 && post.images[0] && (
-                <div className="relative aspect-square w-full bg-gray-100">
+                <div className="relative w-full aspect-[4/3] bg-gray-100 mb-3">
                     <Image
                         src={post.images[0]}
                         alt={post.title}
-                        width={600}
+                        width={800}
                         height={600}
                         className="w-full h-full object-cover"
                         loading="lazy"
-                        unoptimized={true} // Bypass Next.js Image Optimization to fix loading issues
-                        onError={(e) => {
-                            // Fallback if image fails
-                            e.currentTarget.style.display = 'none'
-                        }}
+                        unoptimized={true}
                     />
+                    {/* Badge Overlay */}
+                    <div className="absolute top-3 left-3">
+                        <span className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-sm ${post.type === 'product' ? 'bg-orange-500 text-white' :
+                                post.type === 'service' ? 'bg-purple-500 text-white' :
+                                    'bg-blue-500 text-white'
+                            }`}>
+                            {post.type === 'product' ? 'JUAL' : post.type === 'service' ? 'JASA' : 'INFO'}
+                        </span>
+                    </div>
                 </div>
             )}
 
-            {/* Content */}
-            <div className="p-4">
-                {/* Type Badge */}
-                <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs px-2 py-1 rounded ${post.type === 'product' ? 'bg-orange-100 text-orange-700' :
-                        post.type === 'service' ? 'bg-purple-100 text-purple-700' :
-                            'bg-gray-100 text-gray-700'
-                        }`}>
-                        {post.type === 'product' ? '📦 PRODUK' : post.type === 'service' ? '🎨 JASA' : '💼 INFO'}
-                    </span>
-                    {post.negotiable && (
-                        <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded font-semibold">
-                            NEGO
-                        </span>
-                    )}
+            {/* Footer: Actions */}
+            <div className="px-4 pb-4 pt-1 flex items-center justify-between">
+                <div className="flex gap-4">
+                    <button onClick={handleLike} className={`flex items-center gap-1.5 ${liked ? 'text-red-500' : 'text-gray-600'}`}>
+                        <Heart className={liked ? 'fill-current' : ''} size={24} strokeWidth={1.5} />
+                        <span className="text-sm font-medium">{likeCount || 0}</span>
+                    </button>
+                    <button onClick={handleComment} className="flex items-center gap-1.5 text-gray-600">
+                        <MessageCircle size={24} strokeWidth={1.5} />
+                        <span className="text-sm font-medium">{post.stats?.comments || post.comments_count || 0}</span>
+                    </button>
+                    <button onClick={handleShare} className="text-gray-600">
+                        <Share2 size={24} strokeWidth={1.5} />
+                    </button>
                 </div>
 
-                {/* Title */}
-                <h3 className="font-bold text-lg mb-1 line-clamp-2">{post.title}</h3>
-
-                {/* Description */}
-                <p className="text-gray-700 mb-2 line-clamp-3">{post.description}</p>
-
-                {/* Price */}
-                {post.price !== undefined && (
-                    <div className="mb-3">
-                        {post.price_type === 'starting' ? (
-                            <p className="text-xl font-bold text-orange-600">
-                                Mulai dari {formatPrice(post.price)}
-                            </p>
-                        ) : post.price_type === 'free' ? (
-                            <p className="text-xl font-bold text-green-600">GRATIS</p>
-                        ) : (
-                            <p className="text-xl font-bold text-orange-600">
-                                {formatPrice(post.price)}
-                            </p>
-                        )}
-                    </div>
+                {post.type === 'product' ? (
+                    <button
+                        onClick={handleAddToCart}
+                        className="bg-sky-600 text-white px-6 py-2 rounded-full font-bold text-sm shadow-sm hover:bg-sky-700 active:scale-95 transition"
+                    >
+                        Beli
+                    </button>
+                ) : (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/chat?postId=${post.id}&sellerId=${post.user_id}`)
+                        }}
+                        className="border border-sky-600 text-sky-600 px-6 py-2 rounded-full font-bold text-sm hover:bg-sky-50 active:scale-95 transition"
+                    >
+                        Chat
+                    </button>
                 )}
-
-                {/* Hashtags */}
-                {post.hashtags && post.hashtags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                        {post.hashtags.slice(0, 3).map((tag, idx) => (
-                            <span
-                                key={idx}
-                                className="text-sm text-sky-600 hover:underline cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    router.push(`/explore?tag=${tag}`)
-                                }}
-                            >
-                                #{tag}
-                            </span>
-                        ))}
-                    </div>
-                )}
-
-                {/* Engagement Buttons */}
-                <div className="flex items-center justify-between pt-3 border-t">
-                    <button
-                        onClick={handleLike}
-                        disabled={loading}
-                        className={`flex items-center gap-2 transition ${liked ? 'text-red-500' : 'text-gray-600'
-                            } disabled:opacity-50`}
-                    >
-                        <Heart className={liked ? 'fill-current' : ''} size={20} />
-                        <span>{likeCount}</span>
-                    </button>
-
-                    <button
-                        onClick={handleComment}
-                        className="flex items-center gap-2 text-gray-600"
-                    >
-                        <MessageCircle size={20} />
-                        <span>{post.stats?.comments || post.comments_count || 0}</span>
-                    </button>
-
-                    <button
-                        onClick={handleShare}
-                        className="flex items-center gap-2 text-gray-600"
-                    >
-                        <Share2 size={20} />
-                        <span>{post.stats?.shares || post.shares_count || 0}</span>
-                    </button>
-
-                    {post.type === 'product' ? (
-                        <button
-                            onClick={handleAddToCart}
-                            className="flex items-center gap-2 bg-sky-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-sky-700 transition"
-                        >
-                            <ShoppingCart size={16} />
-                            Keranjang
-                        </button>
-                    ) : (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                router.push(`/chat?postId=${post.id}&sellerId=${post.user_id}`)
-                            }}
-                            className="bg-sky-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-sky-700 transition"
-                        >
-                            📩 Pesan
-                        </button>
-                    )}
-                </div>
             </div>
         </div>
     )

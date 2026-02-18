@@ -96,9 +96,9 @@ export default function HomePage() {
                 query = query.order('likes_count', { ascending: false })
             }
 
-            // Add 10s Timeout
+            // Add 20s Timeout (Relaxed from 10s)
             const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Koneksi timeout, periksa internet anda')), 10000)
+                setTimeout(() => reject(new Error('Koneksi timeout, periksa internet anda')), 20000)
             )
 
             const { data, error } = await Promise.race([

@@ -1,0 +1,17 @@
+{
+    "mcpServers": {
+        "vps-root": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-ssh",
+                "--host",
+                "43.156.1.211",
+                "--username",
+                "root",
+                "--password",
+                "B5B-nEV-sSS-V6M"
+            ]
+        }
+    }
+}

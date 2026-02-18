@@ -38,11 +38,11 @@ export default function CartPage() {
                         <div className="flex items-center gap-2 mb-4 pb-2 border-b">
                             <input type="checkbox" checked className="accent-sky-600" readOnly />
                             <img
-                                src={`https://i.pravatar.cc/150?u=${sellerId}`}
-                                alt="Seller"
-                                className="w-6 h-6 rounded-full"
+                                src={sellerItems[0].sellerAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(sellerItems[0].sellerName || 'Seller')}&background=random`}
+                                alt={sellerItems[0].sellerName || 'Seller'}
+                                className="w-6 h-6 rounded-full object-cover border"
                             />
-                            <span className="font-semibold text-sm">Seller {sellerId.slice(0, 5)}</span>
+                            <span className="font-semibold text-sm">{sellerItems[0].sellerName || `Seller ${sellerId.slice(0, 5)}`}</span>
                         </div>
 
                         {/* Items */}
@@ -104,7 +104,7 @@ export default function CartPage() {
             </div>
 
             {/* Checkout Bar */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg md:static md:shadow-none md:mt-4 md:rounded-xl">
+            <div className="fixed bottom-16 left-0 right-0 bg-white border-t p-4 shadow-lg md:static md:shadow-none md:mt-4 md:rounded-xl">
                 <div className="max-w-md mx-auto md:max-w-2xl lg:max-w-4xl flex items-center justify-between">
                     <div className="flex flex-col">
                         <span className="text-xs text-gray-500">Total Harga</span>

@@ -1,0 +1,15 @@
+.vercel
+.next
+node_modules
+.git
+.env.local
+.env
+*.log
+build_log*.txt
+scripts
+_design_reference
+*.tsbuildinfo
+coverage
+test
+e2e
+cypress

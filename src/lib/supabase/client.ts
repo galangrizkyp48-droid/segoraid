@@ -1,9 +1,16 @@
 import { createBrowserClient } from '@supabase/ssr'
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error('⚠️ Supabase Environment Variables are missing! Check your .env.local or Vercel Settings.')
+}
+
 export const createClient = () =>
     createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        supabaseUrl!,
+        supabaseKey!
     )
 
 // Singleton instance for client-side usage

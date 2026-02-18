@@ -1,21 +1,18 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
+import { useAuthStore } from '@/lib/store/authStore'
 import Link from 'next/link'
 
 export default function LoginPage() {
     const router = useRouter()
+    const { setUser } = useAuthStore()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    let mounted = true
-
-    useEffect(() => {
-        return () => { mounted = false }
-    }, [])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -23,30 +20,30 @@ export default function LoginPage() {
         setError('')
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const result = await signIn('credentials', {
                 email,
                 password,
+                redirect: false,
             })
 
-            if (error) throw error
+            if (result?.error) {
+                setError('Email atau password salah')
+                return
+            }
 
-            if (error) throw error
+            // Fetch profile to populate store
+            const profileRes = await fetch('/api/profile/me')
+            if (profileRes.ok) {
+                const profile = await profileRes.json()
+                setUser(profile)
+            }
 
-            // Soft navigation with state refresh
-            router.refresh()
             router.replace('/')
         } catch (err: any) {
             console.error('Login error:', err)
-            // Specific error handling remains...
-            if (err.message.includes('Email not confirmed')) {
-                setError('Email belum dikonfirmasi. Silakan cek inbox/spam email Anda.')
-            } else if (err.message === 'Invalid login credentials') {
-                setError('Email atau password salah')
-            } else {
-                setError(err.message || 'Terjadi kesalahan login')
-            }
+            setError(err.message || 'Terjadi kesalahan login')
         } finally {
-            if (mounted) setLoading(false)
+            setLoading(false)
         }
     }
 
